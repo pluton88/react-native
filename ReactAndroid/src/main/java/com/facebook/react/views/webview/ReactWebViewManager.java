@@ -56,6 +56,7 @@ import com.facebook.react.uimanager.annotations.ReactProp;
 import com.facebook.react.uimanager.events.ContentSizeChangeEvent;
 import com.facebook.react.uimanager.events.Event;
 import com.facebook.react.uimanager.events.EventDispatcher;
+import com.facebook.react.uimanager.util.ReactFindViewUtil;
 import com.facebook.react.views.webview.events.TopLoadingErrorEvent;
 import com.facebook.react.views.webview.events.TopLoadingFinishEvent;
 import com.facebook.react.views.webview.events.TopLoadingStartEvent;
@@ -139,10 +140,10 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
       mLastLoadFailed = false;
 
       dispatchEvent(
-          webView,
-          new TopLoadingStartEvent(
-              webView.getId(),
-              createWebViewEvent(webView, url)));
+        webView,
+        new TopLoadingStartEvent(
+          ReactFindViewUtil.getReactTag(webView),
+          createWebViewEvent(webView, url)));
     }
 
     @Override
@@ -211,21 +212,21 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
       eventData.putString("description", description);
 
       dispatchEvent(
-          webView,
-          new TopLoadingErrorEvent(webView.getId(), eventData));
+        webView,
+        new TopLoadingErrorEvent(ReactFindViewUtil.getReactTag(webView), eventData));
     }
 
     protected void emitFinishEvent(WebView webView, String url) {
       dispatchEvent(
-          webView,
-          new TopLoadingFinishEvent(
-              webView.getId(),
-              createWebViewEvent(webView, url)));
+        webView,
+        new TopLoadingFinishEvent(
+          ReactFindViewUtil.getReactTag(webView),
+          createWebViewEvent(webView, url)));
     }
 
     protected WritableMap createWebViewEvent(WebView webView, String url) {
       WritableMap event = Arguments.createMap();
-      event.putDouble("target", webView.getId());
+      event.putDouble("target", ReactFindViewUtil.getReactTag(webView));
       // Don't use webView.getUrl() here, the URL isn't updated to the new value yet in callbacks
       // like onPageFinished
       event.putString("url", url);
@@ -358,7 +359,7 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
     }
 
     public void onMessage(String message) {
-      dispatchEvent(this, new TopMessageEvent(this.getId(), message));
+      dispatchEvent(this, new TopMessageEvent(ReactFindViewUtil.getReactTag(this), message));
     }
 
     protected void cleanupCallbacksAndDestroy() {
@@ -675,7 +676,7 @@ public class ReactWebViewManager extends SimpleViewManager<WebView> {
           dispatchEvent(
             webView,
             new ContentSizeChangeEvent(
-              webView.getId(),
+              ReactFindViewUtil.getReactTag(webView),
               webView.getWidth(),
               webView.getContentHeight()));
         }
